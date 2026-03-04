@@ -26,7 +26,11 @@ const AdminProducts = () => {
     const fetchProducts = async () => {
         const res = await fetch('/api/products');
         const data = await res.json();
-        setProducts(data);
+        if (Array.isArray(data)) {
+            setProducts(data);
+        } else {
+            setProducts([]);
+        }
     };
 
     const handleOpenModal = (product: any = null) => {

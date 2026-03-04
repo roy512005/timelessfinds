@@ -22,7 +22,12 @@ const Shop = () => {
         const url = query ? `/api/products?search=${query}` : '/api/products';
         const res = await fetch(url);
         const data = await res.json();
-        setProducts(data);
+        if (Array.isArray(data)) {
+          setProducts(data);
+        } else {
+          console.error('API Error:', data);
+          setProducts([]);
+        }
       } catch (error) {
         console.error('Error fetching products', error);
       }

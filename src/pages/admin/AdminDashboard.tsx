@@ -18,7 +18,11 @@ const AdminDashboard = () => {
         try {
             const res = await fetch('/api/products');
             const data = await res.json();
-            setProducts(data);
+            if (Array.isArray(data)) {
+                setProducts(data);
+            } else {
+                setProducts([]);
+            }
         } catch (error) {
             console.error('Error fetching admin products', error);
         }

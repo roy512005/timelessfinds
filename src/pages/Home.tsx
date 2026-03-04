@@ -11,7 +11,12 @@ const Home = () => {
       try {
         const res = await fetch('/api/products');
         const data = await res.json();
-        setProducts(data);
+        if (Array.isArray(data)) {
+          setProducts(data);
+        } else {
+          console.error('API Error:', data);
+          setProducts([]);
+        }
       } catch (error) {
         console.error('Error fetching products', error);
       }
