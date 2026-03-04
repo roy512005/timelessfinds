@@ -5,14 +5,12 @@ const AdminDashboard = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loggedIn, setLoggedIn] = useState(false);
-    const [token, setToken] = useState<string | null>(null);
     const [products, setProducts] = useState<any[]>([]);
     const [error, setError] = useState('');
 
     useEffect(() => {
         const storedToken = localStorage.getItem('adminToken');
         if (storedToken) {
-            setToken(storedToken);
             setLoggedIn(true);
             fetchProducts();
         }
@@ -42,7 +40,6 @@ const AdminDashboard = () => {
 
             if (res.ok) {
                 localStorage.setItem('adminToken', data.token);
-                setToken(data.token);
                 setLoggedIn(true);
                 fetchProducts();
             } else {
@@ -55,7 +52,6 @@ const AdminDashboard = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('adminToken');
-        setToken(null);
         setLoggedIn(false);
     };
 

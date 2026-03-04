@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { Package, Truck } from 'lucide-react';
 
 const AdminOrders = () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [orders, setOrders] = useState<any[]>([]);
+    const [orders] = useState<any[]>([]);
 
     useEffect(() => {
         // Will fetch /api/admin/orders once the Order model route is live
