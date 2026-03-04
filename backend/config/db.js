@@ -9,14 +9,10 @@ export const connectDB = async () => {
             console.warn('No MongoDB URI found. Skipping DB connection.');
             return;
         }
-        await mongoose.connect(dbUrl, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        });
+        await mongoose.connect(dbUrl);
         console.log(`MongoDB Connected: ${mongoose.connection.host}`);
     } catch (error) {
-        console.error(`Error: ${error.message}`);
-        process.exit(1);
+        console.error(`DB Connection Error: ${error.message}`);
     }
 };
 
