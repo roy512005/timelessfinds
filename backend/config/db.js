@@ -4,19 +4,21 @@ dotenv.config();
 
 let sequelize;
 
-if (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('postgres')) {
-    sequelize = new Sequelize(process.env.DATABASE_URL, {
+const dbUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+
+if (dbUrl && dbUrl.includes('postgres')) {
+    sequelize = new Sequelize(dbUrl, {
         dialect: 'postgres',
         logging: false,
         dialectOptions: {
-            ssl: process.env.NODE_ENV === 'production' ? { require: true, rejectUnauthorized: false } : false
+            ssl: { require: true, rejectUnauthorized: false }
         }
     });
 } else {
     // Fallback to local SQLite database if no Postgres URL is provided yet
     sequelize = new Sequelize({
         dialect: 'sqlite',
-        storage: './backend/database.sqlite',
+        storage: process.env.NODE_ENV === 'production' ? '/tmp/database.sqlite' : './backend/database.sqlite',
         logging: false
     });
 }
