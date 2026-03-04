@@ -10,7 +10,7 @@ const generateToken = (id) => {
 export const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await User.findOne({ where: { email } });
+        const user = await User.findOne({ email });
 
         if (!user) {
             return res.status(401).json({ message: 'Invalid email or password' });
@@ -19,7 +19,7 @@ export const loginUser = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (isMatch) {
-            res.json({ id: user.id, name: user.name, email: user.email, role: user.role, token: generateToken(user.id) });
+            res.json({ id: user._id.toString(), name: user.name, email: user.email, role: user.role, token: generateToken(user._id.toString()) });
         } else {
             res.status(401).json({ message: 'Invalid email or password' });
         }
@@ -31,7 +31,7 @@ export const loginUser = async (req, res) => {
 export const registerUser = async (req, res) => {
     try {
         const { name, email, password } = req.body;
-        const userExists = await User.findOne({ where: { email } });
+        const userExists = await User.findOne({ email });
 
         if (userExists) return res.status(400).json({ message: 'User already exists' });
 
@@ -39,9 +39,9 @@ export const registerUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         const user = await User.create({ name, email, password: hashedPassword });
-        
+
         if (user) {
-            res.status(201).json({ id: user.id, name: user.name, email: user.email, role: user.role, token: generateToken(user.id) });
+            res.status(201).json({ id: user._id.toString(), name: user.name, email: user.email, role: user.role, token: generateToken(user._id.toString()) });
         } else {
             res.status(400).json({ message: 'Invalid user data' });
         }

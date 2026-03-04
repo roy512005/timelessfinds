@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
-import { sequelize, User, Product, Reservation, Order } from './models/index.js';
+import { connectDB } from './config/db.js';
+import { User, Product } from './models/index.js';
 
 dotenv.config();
 
@@ -129,8 +130,10 @@ const products = [
 
 const seedDB = async () => {
     try {
-        await sequelize.authenticate();
-        await sequelize.sync({ force: true });
+        await connectDB();
+
+        await User.deleteMany();
+        await Product.deleteMany();
         console.log('Database synced. Old records wiped.');
 
         // Seed Admin User
@@ -144,8 +147,8 @@ const seedDB = async () => {
         });
         console.log('Admin user created: aproy48@gmail.com / 12345');
 
-        await Product.bulkCreate(products);
-        console.log('20 Rare Products Imported into PostgreSQL!');
+        await Product.insertMany(products);
+        console.log('20 Rare Products Imported into MongoDB!');
 
         process.exit();
     } catch (error) {

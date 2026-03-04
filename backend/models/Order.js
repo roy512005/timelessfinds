@@ -1,10 +1,15 @@
-import { DataTypes } from 'sequelize';
-import sequelize from '../config/db.js';
+import mongoose from 'mongoose';
 
-const Order = sequelize.define('Order', {
-    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-    payment_status: { type: DataTypes.ENUM('pending', 'paid', 'failed'), defaultValue: 'pending' },
-    shipping_status: { type: DataTypes.ENUM('pending', 'shipped', 'delivered'), defaultValue: 'pending' }
+const orderSchema = mongoose.Schema({
+    UserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    ProductId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+    payment_status: { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' },
+    shipping_status: { type: String, enum: ['pending', 'shipped', 'delivered'], default: 'pending' }
+}, {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 });
 
+const Order = mongoose.model('Order', orderSchema);
 export default Order;

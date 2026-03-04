@@ -1,18 +1,24 @@
-import { DataTypes } from 'sequelize';
-import sequelize from '../config/db.js';
+import mongoose from 'mongoose';
 
-const Product = sequelize.define('Product', {
-    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-    title: { type: DataTypes.STRING, allowNull: false },
-    price: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
-    short_description: { type: DataTypes.TEXT, allowNull: false },
-    story_description: { type: DataTypes.TEXT, allowNull: false },
-    category: { type: DataTypes.STRING, allowNull: false },
-    era: { type: DataTypes.STRING, allowNull: false },
-    condition: { type: DataTypes.STRING, allowNull: false },
-    authenticity_note: { type: DataTypes.STRING },
-    images: { type: DataTypes.JSON, defaultValue: [] },
-    status: { type: DataTypes.ENUM('available', 'reserved', 'sold'), defaultValue: 'available' }
+const productSchema = mongoose.Schema({
+    title: { type: String, required: true },
+    price: { type: Number, required: true },
+    short_description: { type: String, required: true },
+    story_description: { type: String, required: true },
+    category: { type: String, required: true },
+    era: { type: String, required: true },
+    condition: { type: String, required: true },
+    authenticity_note: { type: String },
+    images: { type: [String], default: [] },
+    status: { type: String, enum: ['available', 'reserved', 'sold'], default: 'available' }
+}, {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 });
 
+// Create text index for search
+productSchema.index({ title: 'text', category: 'text', era: 'text' });
+
+const Product = mongoose.model('Product', productSchema);
 export default Product;

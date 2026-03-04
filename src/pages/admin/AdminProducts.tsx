@@ -19,6 +19,9 @@ const AdminProducts = () => {
         imageUrl: '' // simplified for demo
     });
 
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+
     useEffect(() => {
         fetchProducts();
     }, []);
@@ -34,6 +37,7 @@ const AdminProducts = () => {
     };
 
     const handleOpenModal = (product: any = null) => {
+        setImageFile(null);
         if (product) {
             setEditingProduct(product);
             setFormData({
@@ -61,17 +65,39 @@ const AdminProducts = () => {
     const handleCloseModal = () => {
         setIsModalOpen(false);
         setEditingProduct(null);
+        setImageFile(null);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        const payload = {
-            ...formData,
-            images: [formData.imageUrl]
-        };
+        setIsUploading(true);
+        let uploadedImageUrl = formData.imageUrl;
 
         try {
+            if (imageFile) {
+                const uploadData = new FormData();
+                uploadData.append('image', imageFile);
+
+                const uploadRes = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: uploadData
+                });
+
+                if (uploadRes.ok) {
+                    const uploadResult = await uploadRes.json();
+                    uploadedImageUrl = uploadResult.url;
+                } else {
+                    alert('Image upload failed');
+                    setIsUploading(false);
+                    return;
+                }
+            }
+
+            const payload = {
+                ...formData,
+                images: [uploadedImageUrl]
+            };
+
             const url = editingProduct ? `/api/products/${editingProduct.id}` : '/api/products';
             const method = editingProduct ? 'PUT' : 'POST';
 
@@ -89,6 +115,8 @@ const AdminProducts = () => {
             }
         } catch (error) {
             console.error(error);
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -174,7 +202,16 @@ const AdminProducts = () => {
                                 <input type="text" required value={formData.era} onChange={e => setFormData({ ...formData, era: e.target.value })} />
                             </div>
                             <div className="form-group full-width">
-                                <label>Image URL</label>
+                                <label>Image File (Cloudinary Upload)</label>
+                                <input type="file" accept="image/*" onChange={e => {
+                                    if (e.target.files && e.target.files[0]) {
+                                        setImageFile(e.target.files[0]);
+                                    }
+                                }} />
+                                {imageFile && <small>File selected: {imageFile.name}</small>}
+                            </div>
+                            <div className="form-group full-width">
+                                <label>Image URL (or upload above)</label>
                                 <input type="text" placeholder="https://..." value={formData.imageUrl} onChange={e => setFormData({ ...formData, imageUrl: e.target.value })} />
                             </div>
                             <div className="form-group full-width">
@@ -202,7 +239,9 @@ const AdminProducts = () => {
                                 </select>
                             </div>
                             <div className="form-group full-width" style={{ marginTop: '1rem' }}>
-                                <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem' }}>{editingProduct ? 'Save Changes' : 'Publish Item'}</button>
+                                <button type="submit" disabled={isUploading} className="btn btn-primary" style={{ width: '100%', padding: '1rem' }}>
+                                    {isUploading ? 'Uploading & Saving...' : editingProduct ? 'Save Changes' : 'Publish Item'}
+                                </button>
                             </div>
                         </form>
                     </motion.div>

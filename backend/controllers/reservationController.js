@@ -5,7 +5,7 @@ export const createReservation = async (req, res) => {
         const { productId, email, name } = req.body;
 
         // 1. Check if user exists, if not create a temporary profile for tracking
-        let user = await User.findOne({ where: { email } });
+        let user = await User.findOne({ email });
         if (!user) {
             user = await User.create({
                 name,
@@ -16,7 +16,7 @@ export const createReservation = async (req, res) => {
         }
 
         // 2. See if the product exists and is available
-        const product = await Product.findByPk(productId);
+        const product = await Product.findById(productId);
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
@@ -27,13 +27,14 @@ export const createReservation = async (req, res) => {
 
         // 3. Create reservation logic
         const reservation = await Reservation.create({
-            UserId: user.id,
-            ProductId: product.id,
+            UserId: user._id,
+            ProductId: product._id,
             status: 'pending' // pending by default
         });
 
         // Optional: you can automatically change the product status to 'reserved' here
-        await product.update({ status: 'reserved' });
+        product.status = 'reserved';
+        await product.save();
 
         res.status(201).json({ message: 'Reservation created successfully', reservation });
     } catch (error) {
