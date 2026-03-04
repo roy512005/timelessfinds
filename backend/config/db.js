@@ -6,21 +6,32 @@ let sequelize;
 
 const dbUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL;
 
-if (dbUrl && dbUrl.includes('postgres')) {
-    sequelize = new Sequelize(dbUrl, {
-        dialect: 'postgres',
-        logging: false,
-        dialectOptions: {
-            ssl: { require: true, rejectUnauthorized: false }
-        }
-    });
-} else {
-    // Fallback to local SQLite database if no Postgres URL is provided yet
-    sequelize = new Sequelize({
-        dialect: 'sqlite',
-        storage: process.env.NODE_ENV === 'production' ? '/tmp/database.sqlite' : './backend/database.sqlite',
-        logging: false
-    });
+try {
+    if (dbUrl && dbUrl.includes('postgres')) {
+        sequelize = new Sequelize(dbUrl, {
+            dialect: 'postgres',
+            logging: false,
+            dialectOptions: {
+                ssl: { require: true, rejectUnauthorized: false }
+            }
+        });
+    } else {
+        // Fallback to local SQLite database if no Postgres URL is provided yet
+        sequelize = new Sequelize({
+            dialect: 'sqlite',
+            storage: process.env.NODE_ENV === 'production' ? '/tmp/database.sqlite' : './backend/database.sqlite',
+            logging: false
+        });
+    }
+} catch (err) {
+    console.error("DB Initialization Error - Missing Native Modules/URL:", err);
+    // Setup a dummy sequelize to prevent entire backend from fatal crashing
+    sequelize = {
+        authenticate: async () => { },
+        sync: async () => { },
+        getDialect: () => "mock",
+        define: () => ({ belongsTo: () => { } })
+    };
 }
 
 export const connectDB = async () => {
