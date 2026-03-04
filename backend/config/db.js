@@ -30,7 +30,8 @@ try {
         authenticate: async () => { },
         sync: async () => { },
         getDialect: () => "mock",
-        define: () => ({ belongsTo: () => { } })
+        define: () => ({ belongsTo: () => { } }),
+        _initError: String(err) + " --- " + err.stack
     };
 }
 
